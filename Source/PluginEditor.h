@@ -14,14 +14,14 @@
 //==============================================================================
 /**
 */
-class OneCompAudioProcessorEditor  : public juce::AudioProcessorEditor, public juce::Timer
+class OneCompAudioProcessorEditor : public juce::AudioProcessorEditor, public juce::Timer
 {
 public:
-    OneCompAudioProcessorEditor (OneCompAudioProcessor&);
+    OneCompAudioProcessorEditor(OneCompAudioProcessor&);
     ~OneCompAudioProcessorEditor() override;
 
     //==============================================================================
-    void paint (juce::Graphics&) override;
+    void paint(juce::Graphics&) override;
     void resized() override;
 
     // Timer callback
@@ -33,8 +33,22 @@ private:
     OneCompAudioProcessor& audioProcessor;
 
     juce::Slider thresholdSlider;
-    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> thresholdAttachment;
-    juce::Label thresholdLabel;
+    juce::Slider ratioSlider;
+    juce::Slider attackSlider;
+    juce::Slider releaseSlider;
+    juce::Slider gainSlider;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OneCompAudioProcessorEditor)
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> thresholdAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> ratioAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> attackAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> releaseAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> gainAttachment;
+
+    juce::Label thresholdLabel;
+    juce::Label ratioLabel;
+    juce::Label attackLabel;
+    juce::Label releaseLabel;
+    juce::Label gainLabel;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(OneCompAudioProcessorEditor)
 };
