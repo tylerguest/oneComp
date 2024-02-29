@@ -6,10 +6,12 @@
   ==============================================================================
 */
 
+#include <JuceHeader.h>
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 #include "GRMeter.h"
 
+using namespace juce;
 
 //==============================================================================
 OneCompAudioProcessor::OneCompAudioProcessor()
@@ -28,41 +30,36 @@ OneCompAudioProcessor::OneCompAudioProcessor()
     parameters.createAndAddParameter(std::make_unique<juce::AudioParameterFloat>(
         "threshold", // parameter ID
         "Threshold", // parameter name
-        -60.0f,      // minimum value
-        0.0f,        // maximum value
-        0.0f         // default value
+        NormalisableRange<float>(-60.0f, 0.0f, 1.0f, 1.0f), // min, max, interval, skewFactor
+        10.0f // default value
     ));
 
     parameters.createAndAddParameter(std::make_unique<juce::AudioParameterFloat>(
         "ratio",
         "Ratio",
-        1.0f,
-        50.0f,
-        2.5f
+        NormalisableRange<float>(1.0f, 25.0f, 0.1f, 0.7f), // min, max, interval, skewFactor
+        2.5f // default value
     ));
 
     parameters.createAndAddParameter(std::make_unique<juce::AudioParameterFloat>(
         "attack",
         "Attack",
-        .5f,
-        500.0f,
-        16.0f
+        NormalisableRange<float>(0.1f, 150.0f, 0.05f, 0.5f), // min, max, interval, skewFactor
+        2.0f // default value
     ));
 
     parameters.createAndAddParameter(std::make_unique<juce::AudioParameterFloat>(
         "release",
         "Release",
-        5.0f,
-        5000.0f,
-        160.0f
+        NormalisableRange<float>(1.5f, 2000.0f, 0.1f, 0.5f), // min, max, interval, skewFactor
+        120.0f // default value
     ));
 
     parameters.createAndAddParameter(std::make_unique<juce::AudioParameterFloat>(
         "gain",
         "Gain",
-        -30.0f,
-        30.0f,
-        0.0f
+        NormalisableRange<float>(-30.0f, 30.0f), // min, max, interval, skewFactor
+        0.0f // default value
     ));
 
     parameters.state = juce::ValueTree("savedParams");
