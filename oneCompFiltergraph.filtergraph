@@ -65,10 +65,10 @@
           uiLastY_Normal="708" uiopen_Normal="1">
     <PLUGIN name="oneComp" format="VST3" category="Fx" manufacturer="yourcompany"
             version="1.0.0" file="E:\Programming\VST Plugins\oneComp\Builds\VisualStudio2022\x64\Debug\VST3\oneComp.vst3\Contents\x86_64-win\oneComp.vst3"
-            uniqueId="2a3dc28" isInstrument="0" fileTime="18df0be065d" infoUpdateTime="18df0c16e52"
+            uniqueId="2a3dc28" isInstrument="0" fileTime="18df2e916c0" infoUpdateTime="18df2e9ab94"
             numInputs="2" numOutputs="2" isShell="0" hasARAExtension="0"
             uid="e95aca88"/>
-    <STATE>191.VMjLgXK....O+fWarAhckI2bo8la8HRLt.iHfTlai8FYo41Y8HRUTYTK3HxO9.BOVMEUy.Ea0cVZtMEcgQWY9vSRC8Vav8lak4Fc9XCLt3hKt3hKt3hKt3hYRUUSTEETIckVwTjQisVTTgkdEYjKAQjYPQSPWgUdMcjKAQjct3hdA4hKt3hKt3hKtnTUv.UQAslXuk0UXoWUFE0YQcEV77RRC8Vav8lak4Fc9vyKVMEUy.Ea0cVZtMEcgQWY9..</STATE>
+    <STATE>511.VMjLgXe....O+fWarAhckI2bo8la8HRLt.iHfTlai8FYo41Y8HRUTYTK3HxO9.BOVMEUy.Ea0cVZtMEcgQWY9vSRC8Vav8lak4Fc9HSN43hUMoFSmgkSt3hKt7zJlcUXxEDZisVRxH1a3vVX3fjTLQmKogjYTwVXogiQY8FMwjENHIUUTkEUKMCR38TNtHzS4UDaisVTFQ0YIcEVy0TaOciKUAkTEQ0TlolQYgCRRgkdQcEVoMGaHYFVWgkbUcUV3fjTLEyLBwDZ2f1S23RUPIUQTMkYpYTV3fDdYc1ZrEFZtf1XmcmUisFLogjcyHDSncCZOciKUAkTEQ0TlolQYgCRnI1YQckV0kjPHESQFEFLUY0SngTZKACR3sTN1MDUAkTUP0TPRokZvjFR3UkQgsVQwH1ZIIDRwTjQgASUV8DZDkVS1MiPLg1Mn8zMtTETRUDUSYlZFkENHIzXtkzUYk2YwDlbQwFRlg0UXIWUWkENHIDSz4RZHU2LC8TcLcEVwTkQYAUQrI1YvDiX43hKt3hKt3hKt3hKt3FUUMTUDQEdqw1XmE0UYQTQFM1YAAkKAgDUjYWQwHVdAAkKAwjKtLlKt3hKt3hKt3hYRUUSTEETIckVwTjQisVTTgkdEYDOujzPu0Fbu4VYtQmO77hUSQ0LPwVcmklaSQWXzUlO..</STATE>
     <LAYOUT>
       <INPUTS>
         <BUS index="0" layout="L R"/>
@@ -82,7 +82,7 @@
           uiLastX_Normal="835" uiLastY_Normal="119" uiopen_Normal="1">
     <PLUGIN name="AudioFilePlayer" format="VST3" category="Fx" manufacturer="Matkat Music LLC"
             version="1.0.0" file="E:\Programming\AudioFilePlayer\Builds\VisualStudio2019\x64\Debug\VST3\AudioFilePlayer.vst3\Contents\x86_64-win\AudioFilePlayer.vst3"
-            uniqueId="79fe81c" isInstrument="0" fileTime="18c653de21d" infoUpdateTime="18df0c16e52"
+            uniqueId="79fe81c" isInstrument="0" fileTime="18c653de21d" infoUpdateTime="18df2e9ab95"
             numInputs="2" numOutputs="2" isShell="0" hasARAExtension="0"
             uid="e95d02c7"/>
     <STATE>314.VMjLgDS....O+fWarAhckI2bo8la8HRLt.iHfTlai8FYo41Y8HRUTYTK3HxO9.BOVMEUy.Ea0cVZtMEcgQWY9vSRC8Vav8lak4Fc9DSMw3BTIISX1UEaho2ZVkUdAAkKAwDUigWRWkEcQ0VTucmUY4BQ18TQLolShUELhsVRxHlX3DiV5s1QgsVRxjELUEiX5cWQQsVSxnkd3XjXhslQH0FNFMlYtbkVxcWLhYlcVoUbUYDRuAiQHoVRGgjcmYkVxQiTgYWSC4hKt3hKt3hKt3hKt3hRUACTEEzZh8VVWgkdUYTTmE0UX4BQP4hPqcjXm0jLh4BQP4xPt.0Qt3hKt3hKt3hKtQUUCUEQTg2ZrM1YQcUVDUjQicVP77RRC8Vav8lak4Fc9vyKVMEUy.Ea0cVZtMEcgQWY9..</STATE>
