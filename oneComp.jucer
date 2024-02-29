@@ -3,6 +3,9 @@
 <JUCERPROJECT id="uoJsIa" name="oneComp" projectType="audioplug" useAppConfig="0"
               addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1">
   <MAINGROUP id="CubnG2" name="oneComp">
+    <GROUP id="{3D4F6500-76E5-6B92-6C0C-F29FE604A6D7}" name="GUI">
+      <FILE id="QdVCLx" name="GRMeter.h" compile="0" resource="0" file="Source/GRMeter.h"/>
+    </GROUP>
     <GROUP id="{DA2D2E11-0079-0E6F-D2F4-7BE98258E4A8}" name="Source">
       <FILE id="KJCk2i" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>

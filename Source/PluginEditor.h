@@ -10,6 +10,7 @@
 
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
+#include "GRMeter.h"
 
 //==============================================================================
 /**
@@ -31,6 +32,8 @@ private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
     OneCompAudioProcessor& audioProcessor;
+    GainReductionMeter gainReductionMeter; // Add this line
+    juce::Label gainReductionLabel;
 
     juce::Slider thresholdSlider;
     juce::Slider ratioSlider;

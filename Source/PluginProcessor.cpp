@@ -8,6 +8,7 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include "GRMeter.h"
 
 
 //==============================================================================
@@ -191,6 +192,9 @@ void OneCompAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce:
     auto totalNumInputChannels = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
 
+    // Assuming mono processing for simplicity. You might need to adjust for stereo or multi-channel.
+    auto inputLevel = buffer.getRMSLevel(0, 0, buffer.getNumSamples()); // Measure input RMS level
+
     // In case we have more outputs than inputs, this code clears any output
     // channels that didn't contain input data, (because these aren't
     // guaranteed to be empty - they may contain garbage).
@@ -219,6 +223,17 @@ void OneCompAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce:
 
     // Process the block with the updated compressor settings
     compressor.process(context);
+
+    // Measure output RMS level after compression
+    auto outputLevel = buffer.getRMSLevel(0, 0, buffer.getNumSamples());
+
+    // Calculate gain reduction in dB. If outputLevel is 0, avoid division by zero.
+    float gainReductionDb = outputLevel > 0 ? juce::Decibels::gainToDecibels(inputLevel / outputLevel) : 0.f;
+
+    // Since we're interested in reduction, we take the negative of the calculated value.
+    // This assumes inputLevel >= outputLevel. Adjust the logic if your scenario could differ.
+    lastGainReduction.store(-gainReductionDb, std::memory_order_release);
+
 
     // This is the place where you'd normally do the guts of your plugin's
     // audio processing...
@@ -278,4 +293,8 @@ void OneCompAudioProcessor::setStateInformation(const void* data, int sizeInByte
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
     return new OneCompAudioProcessor();
+}
+
+float OneCompAudioProcessor::getGainReduction() const {
+    return lastGainReduction.load(std::memory_order_relaxed); // or std::memory_order_acquire
 }

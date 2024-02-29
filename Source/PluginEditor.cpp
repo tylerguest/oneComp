@@ -6,12 +6,15 @@
   ==============================================================================
 */
 
+#include <JuceHeader.h>
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include "GRMeter.h"
+
 
 //==============================================================================
 OneCompAudioProcessorEditor::OneCompAudioProcessorEditor(OneCompAudioProcessor& p)
-    : AudioProcessorEditor(&p), audioProcessor(p)
+    : AudioProcessorEditor(&p), audioProcessor(p), gainReductionMeter(p)
 {
     // Initialize slider here
     thresholdSlider.setSliderStyle(juce::Slider::LinearBar);
@@ -61,12 +64,21 @@ OneCompAudioProcessorEditor::OneCompAudioProcessorEditor(OneCompAudioProcessor& 
     gainLabel.setJustificationType(juce::Justification::centred);
     addAndMakeVisible(gainLabel);
 
+    // Gain reduction meter
+    addAndMakeVisible(gainReductionMeter);
+
+    // Initialize and configure the gain reduction label
+    gainReductionLabel.setFont(juce::Font(16.0f));
+    gainReductionLabel.setText("Gain Reduction: - dB", juce::dontSendNotification);
+    gainReductionLabel.setJustificationType(juce::Justification::centredLeft);
+    addAndMakeVisible(gainReductionLabel);
+
     // Now create the SliderAttachment
-    thresholdAttachment.reset(new juce::AudioProcessorValueTreeState::SliderAttachment(audioProcessor.parameters, "threshold", thresholdSlider));
-    ratioAttachment.reset(new juce::AudioProcessorValueTreeState::SliderAttachment(audioProcessor.parameters, "ratio", ratioSlider));
-    attackAttachment.reset(new juce::AudioProcessorValueTreeState::SliderAttachment(audioProcessor.parameters, "attack", attackSlider));
-    releaseAttachment.reset(new juce::AudioProcessorValueTreeState::SliderAttachment(audioProcessor.parameters, "release", releaseSlider));
-    gainAttachment.reset(new juce::AudioProcessorValueTreeState::SliderAttachment(audioProcessor.parameters, "gain", gainSlider));
+    // thresholdAttachment.reset(new juce::AudioProcessorValueTreeState::SliderAttachment(audioProcessor.parameters, "threshold", thresholdSlider));
+    // ratioAttachment.reset(new juce::AudioProcessorValueTreeState::SliderAttachment(audioProcessor.parameters, "ratio", ratioSlider));
+    // attackAttachment.reset(new juce::AudioProcessorValueTreeState::SliderAttachment(audioProcessor.parameters, "attack", attackSlider));
+    // releaseAttachment.reset(new juce::AudioProcessorValueTreeState::SliderAttachment(audioProcessor.parameters, "release", releaseSlider));
+    // gainAttachment.reset(new juce::AudioProcessorValueTreeState::SliderAttachment(audioProcessor.parameters, "gain", gainSlider));
 
     // Initialize SliderAttachment objects
     thresholdAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.parameters, "threshold", thresholdSlider);
@@ -76,7 +88,8 @@ OneCompAudioProcessorEditor::OneCompAudioProcessorEditor(OneCompAudioProcessor& 
 
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
-    setSize(400, 450);
+    gainReductionMeter.repaint();
+    setSize(400, 525);
 
     startTimer(100);
 }
@@ -140,6 +153,10 @@ void OneCompAudioProcessorEditor::resized()
     gainLabel.setBounds(area.removeFromTop(labelHeight));
     area.removeFromTop(gap); // Add a gap between the label and the next slider
     // If you add more components, continue adjusting 'area' as needed
+
+    gainReductionMeter.setBounds(getLocalBounds().removeFromBottom(75).reduced(10));
+    gainReductionLabel.setBounds(10, getHeight() - 30, getWidth() - 20, 20);
+
 }
 
 void OneCompAudioProcessorEditor::timerCallback()
@@ -158,4 +175,8 @@ void OneCompAudioProcessorEditor::timerCallback()
 
     auto gainValue = audioProcessor.parameters.getRawParameterValue("gain")->load();
     gainLabel.setText("Gain: " + juce::String(gainValue, 2), juce::dontSendNotification);
+
+    auto reductionDb = audioProcessor.getGainReduction();
+    gainReductionLabel.setText(juce::String(reductionDb, 2) + " dB", juce::dontSendNotification);
 }
+
