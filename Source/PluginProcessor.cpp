@@ -9,6 +9,7 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
+
 //==============================================================================
 OneCompAudioProcessor::OneCompAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -65,12 +66,7 @@ OneCompAudioProcessor::OneCompAudioProcessor()
 
     parameters.state = juce::ValueTree("savedParams");
 
-    // Add parameters
-   // addParameter(threshold = new juce::AudioParameterFloat("threshold", "Threshold", -60.0f, 0.0f, 0.0f));
-   // addParameter(ratio = new juce::AudioParameterFloat("ratio", "Ratio", 1.0f, 20.0f, 1.0f));
-   // addParameter(attack = new juce::AudioParameterFloat("attack", "Attack", 0.1f, 100.0f, 10.0f));
-   // addParameter(release = new juce::AudioParameterFloat("release", "Release", 10.0f, 1000.0f, 200.0f));
-   // addParameter(gain = new juce::AudioParameterFloat("gain", "Gain", -24.0f, 24.0f, 0.0f));
+    
 }
 
 OneCompAudioProcessor::~OneCompAudioProcessor()
@@ -144,6 +140,17 @@ void OneCompAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
+    juce::dsp::ProcessSpec spec;
+    spec.sampleRate = sampleRate;
+    spec.maximumBlockSize = samplesPerBlock;
+    spec.numChannels = getTotalNumOutputChannels();
+
+    compressor.prepare(spec);
+    compressor.setThreshold(-20.f);
+    compressor.setRatio(2.f);
+    compressor.setAttack(10.f);
+    compressor.setRelease(100.f);
+
 }
 
 void OneCompAudioProcessor::releaseResources()
@@ -193,6 +200,26 @@ void OneCompAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce:
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear(i, 0, buffer.getNumSamples());
 
+    // Retrieve parameter values
+    float threshold = *parameters.getRawParameterValue("threshold");
+    float ratio = *parameters.getRawParameterValue("ratio");
+    float attackTime = *parameters.getRawParameterValue("attack");
+    float releaseTime = *parameters.getRawParameterValue("release");
+    float makeupGain = *parameters.getRawParameterValue("gain");
+
+    // Assuming 'compressor' is a member of type juce::dsp::Compressor<float> or similar
+    compressor.setThreshold(threshold);
+    compressor.setRatio(ratio);
+    compressor.setAttack(attackTime);
+    compressor.setRelease(releaseTime);
+
+    // Prepare the DSP context
+    juce::dsp::AudioBlock<float> block(buffer);
+    juce::dsp::ProcessContextReplacing<float> context(block);
+
+    // Process the block with the updated compressor settings
+    compressor.process(context);
+
     // This is the place where you'd normally do the guts of your plugin's
     // audio processing...
     // Make sure to reset the state if your inner loop is processing
@@ -202,6 +229,20 @@ void OneCompAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce:
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
         auto* channelData = buffer.getWritePointer(channel);
+
+        for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
+        {
+            // Placeholder for actual compression logic
+            // For demonstration, let's just apply makeup gain
+            float inputSample = channelData[sample];
+            float inputGain = juce::Decibels::decibelsToGain(makeupGain);
+            channelData[sample] = inputSample * inputGain;
+
+            // TODO: Implement actual compression logic here
+            // This would involve checking the level of each sample against the threshold,
+            // applying gain reduction based on the ratio, and smoothing the gain changes
+            // with the attack and release parameters.
+        }
 
         // ..do something to the data...
     }

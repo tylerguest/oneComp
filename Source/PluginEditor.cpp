@@ -68,6 +68,12 @@ OneCompAudioProcessorEditor::OneCompAudioProcessorEditor(OneCompAudioProcessor& 
     releaseAttachment.reset(new juce::AudioProcessorValueTreeState::SliderAttachment(audioProcessor.parameters, "release", releaseSlider));
     gainAttachment.reset(new juce::AudioProcessorValueTreeState::SliderAttachment(audioProcessor.parameters, "gain", gainSlider));
 
+    // Initialize SliderAttachment objects
+    thresholdAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.parameters, "threshold", thresholdSlider);
+    ratioAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.parameters, "ratio", ratioSlider);
+    attackAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.parameters, "attack", attackSlider);
+    releaseAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.parameters, "release", releaseSlider);
+
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
     setSize(400, 450);
@@ -139,17 +145,17 @@ void OneCompAudioProcessorEditor::resized()
 void OneCompAudioProcessorEditor::timerCallback()
 {
     auto thresholdValue = audioProcessor.parameters.getRawParameterValue("threshold")->load();
-    thresholdLabel.setText("Threshold: " + juce::String(thresholdValue, 2) + " dB", juce::dontSendNotification);
+    thresholdLabel.setText("Threshold: " + juce::String(thresholdValue, 2), juce::dontSendNotification);
 
     auto ratioValue = audioProcessor.parameters.getRawParameterValue("ratio")->load();
-    ratioLabel.setText("Ratio: " + juce::String(ratioValue, 2) + " dB", juce::dontSendNotification);
+    ratioLabel.setText("Ratio: " + juce::String(ratioValue, 2), juce::dontSendNotification);
 
     auto attackValue = audioProcessor.parameters.getRawParameterValue("attack")->load();
-    attackLabel.setText("Attack: " + juce::String(attackValue, 2) + " dB", juce::dontSendNotification);
+    attackLabel.setText("Attack: " + juce::String(attackValue, 2), juce::dontSendNotification);
 
     auto releaseValue = audioProcessor.parameters.getRawParameterValue("release")->load();
-    releaseLabel.setText("Release: " + juce::String(releaseValue, 2) + " dB", juce::dontSendNotification);
+    releaseLabel.setText("Release: " + juce::String(releaseValue, 2), juce::dontSendNotification);
 
     auto gainValue = audioProcessor.parameters.getRawParameterValue("gain")->load();
-    gainLabel.setText("Gain: " + juce::String(gainValue, 2) + " dB", juce::dontSendNotification);
+    gainLabel.setText("Gain: " + juce::String(gainValue, 2), juce::dontSendNotification);
 }
