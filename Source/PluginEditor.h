@@ -35,6 +35,8 @@ private:
     GainReductionMeter gainReductionMeter; // Add this line
     juce::Label gainReductionLabel;
 
+    juce::Image background;
+
     juce::Slider thresholdSlider;
     juce::Slider ratioSlider;
     juce::Slider attackSlider;
