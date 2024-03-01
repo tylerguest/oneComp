@@ -14,15 +14,19 @@
 
 //==============================================================================
 OneCompAudioProcessorEditor::OneCompAudioProcessorEditor(OneCompAudioProcessor& p)
-    : AudioProcessorEditor(&p), audioProcessor(p), gainReductionMeter(p)
+    : AudioProcessorEditor(&p), audioProcessor(p), gainReductionMeter(p),
+    thresholdKnob(juce::ImageCache::getFromMemory(BinaryData::oneCompThresholdButton_png, 
+                                                  BinaryData::oneCompThresholdButton_pngSize))
 {
     background = juce::ImageCache::getFromMemory(BinaryData::oneCompBG_png, BinaryData::oneCompBG_pngSize);
 
+
+
     // Initialize slider here
-    thresholdSlider.setSliderStyle(juce::Slider::LinearBar);
+    thresholdSlider.setSliderStyle(juce::Slider::Rotary);
     thresholdSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 90, 0);
     thresholdSlider.setRange(-60.0f, 0.0f, 1.0f);
-    //addAndMakeVisible(&thresholdSlider);
+    addAndMakeVisible(&thresholdSlider);
 
     ratioSlider.setSliderStyle(juce::Slider::LinearBar);
     ratioSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 90, 0);
@@ -89,11 +93,11 @@ OneCompAudioProcessorEditor::OneCompAudioProcessorEditor(OneCompAudioProcessor& 
     releaseAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.parameters, "release", releaseSlider);
     gainAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.parameters, "gain", gainSlider);
 
-
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
     gainReductionMeter.repaint();
     setSize(background.getWidth(), background.getHeight());
+    addAndMakeVisible(&thresholdKnob);
 
     startTimer(100);
 }
@@ -164,6 +168,16 @@ void OneCompAudioProcessorEditor::resized()
 
     gainReductionMeter.setBounds(getLocalBounds().removeFromBottom(75).reduced(10));
     gainReductionLabel.setBounds(10, getHeight() - 30, getWidth() - 20, 20);
+
+    // Retrieve the image bounds from the ImageKnob instance
+    auto knobBounds = thresholdKnob.getImageBounds();
+
+    // Custom position
+    int knobX = 50; // Change this to your desired X coordinate
+    int knobY = 80; // Change this to your desired Y coordinate
+
+    // Set the knob bounds
+    thresholdKnob.setBounds(knobX, knobY, knobBounds.getWidth(), knobBounds.getHeight());
 
 }
 

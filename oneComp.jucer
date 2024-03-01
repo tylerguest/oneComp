@@ -4,6 +4,8 @@
               addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1">
   <MAINGROUP id="CubnG2" name="oneComp">
     <GROUP id="{F21A1C7D-B006-CECE-B81D-12219FE73ACB}" name="Assets">
+      <FILE id="BaWEGI" name="oneCompThresholdButton.png" compile="0" resource="1"
+            file="../PSD/oneComp/oneCompThresholdButton.png"/>
       <FILE id="JWDf9y" name="oneCompBG.png" compile="0" resource="1" file="../PSD/oneComp/oneCompBG.png"/>
     </GROUP>
     <GROUP id="{3D4F6500-76E5-6B92-6C0C-F29FE604A6D7}" name="GUI">
