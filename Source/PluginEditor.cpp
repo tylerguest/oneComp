@@ -11,7 +11,6 @@
 #include "PluginEditor.h"
 #include "GRMeter.h"
 
-
 //==============================================================================
 OneCompAudioProcessorEditor::OneCompAudioProcessorEditor(OneCompAudioProcessor& p)
     : AudioProcessorEditor(&p), audioProcessor(p), gainReductionMeter(p),
@@ -23,10 +22,15 @@ OneCompAudioProcessorEditor::OneCompAudioProcessorEditor(OneCompAudioProcessor& 
 
 
     // Initialize slider here
-    thresholdSlider.setSliderStyle(juce::Slider::Rotary);
-    thresholdSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 90, 0);
-    thresholdSlider.setRange(-60.0f, 0.0f, 1.0f);
-    addAndMakeVisible(&thresholdSlider);
+    //thresholdSlider.setSliderStyle(juce::Slider::Rotary);
+    //thresholdSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 90, 0);
+    //thresholdSlider.setRange(-60.0f, 0.0f, 1.0f);
+    //addAndMakeVisible(&thresholdSlider);
+
+    addAndMakeVisible(&thresholdKnob);
+    
+    // Correctly cast audioProcessor to OneCompAudioProcessor& to access custom members like `parameters`
+    //auto& processor = static_cast<OneCompAudioProcessor&>(audioProcessor);
 
     ratioSlider.setSliderStyle(juce::Slider::LinearBar);
     ratioSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 90, 0);
@@ -87,7 +91,9 @@ OneCompAudioProcessorEditor::OneCompAudioProcessorEditor(OneCompAudioProcessor& 
     // gainAttachment.reset(new juce::AudioProcessorValueTreeState::SliderAttachment(audioProcessor.parameters, "gain", gainSlider));
 
     // Initialize SliderAttachment objects
-    thresholdAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.parameters, "threshold", thresholdSlider);
+    // Initialize the knob and create its attachment
+    initializeKnob(thresholdKnob, "threshold");
+    thresholdAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.parameters, "threshold", thresholdKnob);
     ratioAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.parameters, "ratio", ratioSlider);
     attackAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.parameters, "attack", attackSlider);
     releaseAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.parameters, "release", releaseSlider);
@@ -97,7 +103,6 @@ OneCompAudioProcessorEditor::OneCompAudioProcessorEditor(OneCompAudioProcessor& 
     // editor's size to whatever you need it to be.
     gainReductionMeter.repaint();
     setSize(background.getWidth(), background.getHeight());
-    addAndMakeVisible(&thresholdKnob);
 
     startTimer(100);
 }
@@ -202,3 +207,11 @@ void OneCompAudioProcessorEditor::timerCallback()
     gainReductionLabel.setText(juce::String(reductionDb, 2) + " dB", juce::dontSendNotification);
 }
 
+void OneCompAudioProcessorEditor::initializeKnob(ImageKnob& knob, const juce::String& parameterId)
+{
+    addAndMakeVisible(knob);
+    auto& processor = static_cast<OneCompAudioProcessor&>(audioProcessor);
+    auto attachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
+        processor.parameters, parameterId, knob);
+    // Depending on your design, you might keep these attachments in a vector if they need to be accessed later
+}

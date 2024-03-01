@@ -208,11 +208,11 @@ void OneCompAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce:
     float releaseTime = *parameters.getRawParameterValue("release");
     float makeupGain = *parameters.getRawParameterValue("gain");
 
-    // Assuming 'compressor' is a member of type juce::dsp::Compressor<float> or similar
-    compressor.setThreshold(threshold);
-    compressor.setRatio(ratio);
-    compressor.setAttack(attackTime);
-    compressor.setRelease(releaseTime);
+    // Update the compressor settings from parameters
+    compressor.setThreshold(*parameters.getRawParameterValue("threshold"));
+    compressor.setRatio(*parameters.getRawParameterValue("ratio"));
+    compressor.setAttack(*parameters.getRawParameterValue("attack"));
+    compressor.setRelease(*parameters.getRawParameterValue("release"));
 
     // Prepare the DSP context
     juce::dsp::AudioBlock<float> block(buffer);

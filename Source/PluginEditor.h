@@ -19,7 +19,7 @@
 class ImageKnob : public juce::Slider {
 public:
     ImageKnob(const juce::Image& knobImage) : image(knobImage) {
-        setSliderStyle(SliderStyle::RotaryVerticalDrag);
+        setSliderStyle(SliderStyle::RotaryHorizontalVerticalDrag);
         setTextBoxStyle(NoTextBox, false, 0, 0);
         setRotaryParameters(juce::MathConstants<float>::pi * 1.25f,
             juce::MathConstants<float>::pi * 2.75f, true);
@@ -65,7 +65,7 @@ private:
 */
 class OneCompAudioProcessorEditor : public juce::AudioProcessorEditor, public juce::Timer
 {
-ImageKnob thresholdKnob;
+
 
 public:
     OneCompAudioProcessorEditor(OneCompAudioProcessor&);
@@ -79,6 +79,9 @@ public:
     // Timer callback
     void timerCallback() override;
 
+    // Utility function to initialize knobs and their attachments
+    void initializeKnob(ImageKnob& knob, const juce::String& parameterId);
+
 private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
@@ -87,6 +90,7 @@ private:
     juce::Label gainReductionLabel;
 
     juce::Image background;
+    ImageKnob thresholdKnob;
    
     juce::Slider thresholdSlider;
     juce::Slider ratioSlider;
