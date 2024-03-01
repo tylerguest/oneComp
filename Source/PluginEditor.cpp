@@ -15,7 +15,9 @@
 OneCompAudioProcessorEditor::OneCompAudioProcessorEditor(OneCompAudioProcessor& p)
     : AudioProcessorEditor(&p), audioProcessor(p), gainReductionMeter(p),
     thresholdKnob(juce::ImageCache::getFromMemory(BinaryData::oneCompThresholdButton_png, 
-                                                  BinaryData::oneCompThresholdButton_pngSize))
+                                                  BinaryData::oneCompThresholdButton_pngSize)),
+    gainKnob(juce::ImageCache::getFromMemory(BinaryData::oneCompGainButton_png,
+        BinaryData::oneCompGainButton_pngSize))
 {
     background = juce::ImageCache::getFromMemory(BinaryData::oneCompBG_png, BinaryData::oneCompBG_pngSize);
 
@@ -28,6 +30,7 @@ OneCompAudioProcessorEditor::OneCompAudioProcessorEditor(OneCompAudioProcessor& 
     //addAndMakeVisible(&thresholdSlider);
 
     addAndMakeVisible(&thresholdKnob);
+    addAndMakeVisible(gainLabel);
     
     // Correctly cast audioProcessor to OneCompAudioProcessor& to access custom members like `parameters`
     //auto& processor = static_cast<OneCompAudioProcessor&>(audioProcessor);
@@ -93,11 +96,12 @@ OneCompAudioProcessorEditor::OneCompAudioProcessorEditor(OneCompAudioProcessor& 
     // Initialize SliderAttachment objects
     // Initialize the knob and create its attachment
     initializeKnob(thresholdKnob, "threshold");
+    initializeKnob(gainKnob, "threshold");
     thresholdAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.parameters, "threshold", thresholdKnob);
     ratioAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.parameters, "ratio", ratioSlider);
     attackAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.parameters, "attack", attackSlider);
     releaseAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.parameters, "release", releaseSlider);
-    gainAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.parameters, "gain", gainSlider);
+    gainAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.parameters, "gain", gainKnob);
 
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
@@ -176,13 +180,19 @@ void OneCompAudioProcessorEditor::resized()
 
     // Retrieve the image bounds from the ImageKnob instance
     auto knobBounds = thresholdKnob.getImageBounds();
+    
 
     // Custom position
     int knobX = 50; // Change this to your desired X coordinate
     int knobY = 80; // Change this to your desired Y coordinate
-
     // Set the knob bounds
     thresholdKnob.setBounds(knobX, knobY, knobBounds.getWidth(), knobBounds.getHeight());
+
+    // Inside OneCompAudioProcessorEditor::resized()
+    int gainKnobX = knobX + 400; // Example: Place it 200 pixels to the right of the threshold knob
+    int gainKnobY = knobY; // Keep it on the same vertical level
+    gainKnob.setBounds(gainKnobX, gainKnobY, knobBounds.getWidth(), knobBounds.getHeight());
+    
 
 }
 

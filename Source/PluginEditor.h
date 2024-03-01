@@ -91,6 +91,7 @@ private:
 
     juce::Image background;
     ImageKnob thresholdKnob;
+    ImageKnob gainKnob;
    
     juce::Slider thresholdSlider;
     juce::Slider ratioSlider;
