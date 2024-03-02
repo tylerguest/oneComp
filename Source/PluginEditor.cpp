@@ -15,9 +15,16 @@
 OneCompAudioProcessorEditor::OneCompAudioProcessorEditor(OneCompAudioProcessor& p)
     : AudioProcessorEditor(&p), audioProcessor(p), gainReductionMeter(p),
     thresholdKnob(juce::ImageCache::getFromMemory(BinaryData::oneCompThresholdButton_png, 
-                                                  BinaryData::oneCompThresholdButton_pngSize)),
+        BinaryData::oneCompThresholdButton_pngSize)),
     gainKnob(juce::ImageCache::getFromMemory(BinaryData::oneCompGainButton_png,
-        BinaryData::oneCompGainButton_pngSize))
+        BinaryData::oneCompGainButton_pngSize)),
+    attackKnob(juce::ImageCache::getFromMemory(BinaryData::oneCompSmallButton_png,
+        BinaryData::oneCompSmallButton_pngSize)),
+    ratioKnob(juce::ImageCache::getFromMemory(BinaryData::oneCompSmallButton_png,
+        BinaryData::oneCompSmallButton_pngSize)),
+    releaseKnob(juce::ImageCache::getFromMemory(BinaryData::oneCompSmallButton_png,
+        BinaryData::oneCompSmallButton_pngSize))
+
 {
     background = juce::ImageCache::getFromMemory(BinaryData::oneCompBG_png, BinaryData::oneCompBG_pngSize);
 
@@ -30,8 +37,11 @@ OneCompAudioProcessorEditor::OneCompAudioProcessorEditor(OneCompAudioProcessor& 
     //addAndMakeVisible(&thresholdSlider);
 
     addAndMakeVisible(&thresholdKnob);
-    addAndMakeVisible(gainLabel);
-    
+    addAndMakeVisible(&gainKnob);
+    addAndMakeVisible(&attackKnob);
+    addAndMakeVisible(&ratioKnob);
+    addAndMakeVisible(&releaseKnob);
+
     // Correctly cast audioProcessor to OneCompAudioProcessor& to access custom members like `parameters`
     //auto& processor = static_cast<OneCompAudioProcessor&>(audioProcessor);
 
@@ -80,12 +90,6 @@ OneCompAudioProcessorEditor::OneCompAudioProcessorEditor(OneCompAudioProcessor& 
     // Gain reduction meter
     // addAndMakeVisible(gainReductionMeter);
 
-    // Initialize and configure the gain reduction label
-    gainReductionLabel.setFont(juce::Font(16.0f));
-    gainReductionLabel.setText("Gain Reduction: - dB", juce::dontSendNotification);
-    gainReductionLabel.setJustificationType(juce::Justification::centredLeft);
-    // addAndMakeVisible(gainReductionLabel);
-
     // Now create the SliderAttachment
     // thresholdAttachment.reset(new juce::AudioProcessorValueTreeState::SliderAttachment(audioProcessor.parameters, "threshold", thresholdSlider));
     // ratioAttachment.reset(new juce::AudioProcessorValueTreeState::SliderAttachment(audioProcessor.parameters, "ratio", ratioSlider));
@@ -96,12 +100,36 @@ OneCompAudioProcessorEditor::OneCompAudioProcessorEditor(OneCompAudioProcessor& 
     // Initialize SliderAttachment objects
     // Initialize the knob and create its attachment
     initializeKnob(thresholdKnob, "threshold");
-    initializeKnob(gainKnob, "threshold");
+    initializeKnob(gainKnob, "gain");
+    initializeKnob(attackKnob, "attack");
+    initializeKnob(ratioKnob, "ratio");
+    initializeKnob(releaseKnob, "release");
+
     thresholdAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.parameters, "threshold", thresholdKnob);
-    ratioAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.parameters, "ratio", ratioSlider);
-    attackAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.parameters, "attack", attackSlider);
-    releaseAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.parameters, "release", releaseSlider);
+    ratioAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.parameters, "ratio", ratioKnob);
+    attackAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.parameters, "attack", attackKnob);
+    releaseAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.parameters, "release", releaseKnob);
     gainAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.parameters, "gain", gainKnob);
+
+    // Position the input, GR, and output labels
+    inputLabel.setText("0.0", juce::dontSendNotification);
+    inputLabel.setFont(juce::Font(75.0f, juce::Font::bold));
+    inputLabel.setColour(juce::Label::textColourId, juce::Colours::black);
+    inputLabel.setBounds(83, 825, 150, 80); // These bounds are arbitrary; set them according to your GUI design
+    addAndMakeVisible(inputLabel);
+
+    
+    gainReductionLabel.setText("0.0", juce::dontSendNotification);
+    gainReductionLabel.setFont(juce::Font(75.0f, juce::Font::bold));
+    gainReductionLabel.setColour(juce::Label::textColourId, juce::Colours::red);
+    gainReductionLabel.setBounds(322, 825, 150, 80);
+    addAndMakeVisible(gainReductionLabel);
+
+    outputLabel.setText("0.0", juce::dontSendNotification);
+    outputLabel.setFont(juce::Font(75.0f, juce::Font::bold));
+    outputLabel.setColour(juce::Label::textColourId, juce::Colours::black);
+    outputLabel.setBounds(560, 825, 150, 80);
+    addAndMakeVisible(outputLabel);
 
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
@@ -175,12 +203,8 @@ void OneCompAudioProcessorEditor::resized()
     area.removeFromTop(gap); // Add a gap between the label and the next slider
     // If you add more components, continue adjusting 'area' as needed
 
-    gainReductionMeter.setBounds(getLocalBounds().removeFromBottom(75).reduced(10));
-    gainReductionLabel.setBounds(10, getHeight() - 30, getWidth() - 20, 20);
-
     // Retrieve the image bounds from the ImageKnob instance
     auto knobBounds = thresholdKnob.getImageBounds();
-    
 
     // Custom position
     int knobX = 50; // Change this to your desired X coordinate
@@ -192,8 +216,21 @@ void OneCompAudioProcessorEditor::resized()
     int gainKnobX = knobX + 400; // Example: Place it 200 pixels to the right of the threshold knob
     int gainKnobY = knobY; // Keep it on the same vertical level
     gainKnob.setBounds(gainKnobX, gainKnobY, knobBounds.getWidth(), knobBounds.getHeight());
-    
 
+    // Inside OneCompAudioProcessorEditor::resized()
+    int attackKnobX = knobX - 50; // Example: Place it 200 pixels to the right of the threshold knob
+    int attackKnobY = knobY + 350; // Keep it on the same vertical level
+    attackKnob.setBounds(attackKnobX, attackKnobY, knobBounds.getWidth(), knobBounds.getHeight());
+
+    // Inside OneCompAudioProcessorEditor::resized()
+    int ratioKnobX = knobX + 200; // Example: Place it 200 pixels to the right of the threshold knob
+    int ratioKnobY = knobY + 250; // Keep it on the same vertical level
+    ratioKnob.setBounds(ratioKnobX, ratioKnobY, knobBounds.getWidth(), knobBounds.getHeight());
+
+    // Inside OneCompAudioProcessorEditor::resized()
+    int releaseKnobX = knobX + 450; // Example: Place it 200 pixels to the right of the threshold knob
+    int releaseKnobY = knobY + 350; // Keep it on the same vertical level
+    releaseKnob.setBounds(releaseKnobX, releaseKnobY, knobBounds.getWidth(), knobBounds.getHeight());
 }
 
 void OneCompAudioProcessorEditor::timerCallback()
@@ -213,8 +250,28 @@ void OneCompAudioProcessorEditor::timerCallback()
     auto gainValue = audioProcessor.parameters.getRawParameterValue("gain")->load();
     gainLabel.setText("Gain: " + juce::String(gainValue, 2), juce::dontSendNotification);
 
-    auto reductionDb = audioProcessor.getGainReduction();
-    gainReductionLabel.setText(juce::String(reductionDb, 2) + " dB", juce::dontSendNotification);
+    auto formatDbValueForDisplay = [](float dbValue) -> juce::String {
+        if (dbValue <= -100.0f || dbValue == 0.0f) { // or use a small value close to silence if -100 is too strict
+            return "-0.0";
+        }
+        else {
+            return juce::String(dbValue, 1);
+        }
+        };
+
+
+    // Input level
+    auto inputDb = audioProcessor.getInputLevel();
+    inputLabel.setText(formatDbValueForDisplay(inputDb), juce::dontSendNotification);
+
+    // Gain reduction
+    auto grDb = audioProcessor.getGainReduction();
+    gainReductionLabel.setText(formatDbValueForDisplay(grDb), juce::dontSendNotification);
+
+    // Output level
+    auto outputDb = audioProcessor.getOutputLevel();
+    outputLabel.setText(formatDbValueForDisplay(outputDb), juce::dontSendNotification);
+
 }
 
 void OneCompAudioProcessorEditor::initializeKnob(ImageKnob& knob, const juce::String& parameterId)

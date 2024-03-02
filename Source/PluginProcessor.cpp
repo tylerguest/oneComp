@@ -38,7 +38,7 @@ OneCompAudioProcessor::OneCompAudioProcessor()
         "ratio",
         "Ratio",
         NormalisableRange<float>(1.0f, 25.0f, 0.1f, 0.7f), // min, max, interval, skewFactor
-        2.5f // default value
+        21.5f // default value
     ));
 
     parameters.createAndAddParameter(std::make_unique<juce::AudioParameterFloat>(
@@ -144,10 +144,10 @@ void OneCompAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock
     spec.numChannels = getTotalNumOutputChannels();
 
     compressor.prepare(spec);
-    compressor.setThreshold(-20.f);
-    compressor.setRatio(2.f);
-    compressor.setAttack(10.f);
-    compressor.setRelease(100.f);
+    //compressor.setThreshold(-20.f);
+    //compressor.setRatio(2.f);
+    //compressor.setAttack(10.f);
+    //compressor.setRelease(100.f);
 
 }
 
@@ -191,6 +191,8 @@ void OneCompAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce:
 
     // Assuming mono processing for simplicity. You might need to adjust for stereo or multi-channel.
     auto inputLevel = buffer.getRMSLevel(0, 0, buffer.getNumSamples()); // Measure input RMS level
+    float inputLevelDb = inputLevel > 0.0f ? juce::Decibels::gainToDecibels(inputLevel) : -100.0f;
+    lastInputLevel.store(inputLevelDb, std::memory_order_relaxed);
 
     // In case we have more outputs than inputs, this code clears any output
     // channels that didn't contain input data, (because these aren't
@@ -223,14 +225,13 @@ void OneCompAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce:
 
     // Measure output RMS level after compression
     auto outputLevel = buffer.getRMSLevel(0, 0, buffer.getNumSamples());
+    float outputLevelDb = outputLevel > 0.0f ? juce::Decibels::gainToDecibels(outputLevel) : -100.0f;
 
     // Calculate gain reduction in dB. If outputLevel is 0, avoid division by zero.
     float gainReductionDb = outputLevel > 0 ? juce::Decibels::gainToDecibels(inputLevel / outputLevel) : 0.f;
-
     // Since we're interested in reduction, we take the negative of the calculated value.
     // This assumes inputLevel >= outputLevel. Adjust the logic if your scenario could differ.
     lastGainReduction.store(-gainReductionDb, std::memory_order_release);
-
 
     // This is the place where you'd normally do the guts of your plugin's
     // audio processing...
@@ -257,6 +258,12 @@ void OneCompAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce:
         }
 
         // ..do something to the data...
+        auto outputLevel = buffer.getRMSLevel(0, 0, buffer.getNumSamples());
+        float outputLevelDb = outputLevel > 0.0f ? juce::Decibels::gainToDecibels(outputLevel) : -100.0f;
+
+        lastOutputLevel.store(outputLevelDb, std::memory_order_relaxed);
+
+     
     }
 }
 
@@ -309,4 +316,12 @@ juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 
 float OneCompAudioProcessor::getGainReduction() const {
     return lastGainReduction.load(std::memory_order_relaxed); // or std::memory_order_acquire
+}
+
+float OneCompAudioProcessor::getInputLevel() const {
+    return lastInputLevel.load(std::memory_order_relaxed);
+}
+
+float OneCompAudioProcessor::getOutputLevel() const {
+    return lastOutputLevel.load(std::memory_order_relaxed);
 }

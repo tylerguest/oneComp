@@ -87,11 +87,13 @@ private:
     // access the processor object that created it.
     OneCompAudioProcessor& audioProcessor;
     GainReductionMeter gainReductionMeter; // Add this line
-    juce::Label gainReductionLabel;
 
     juce::Image background;
     ImageKnob thresholdKnob;
     ImageKnob gainKnob;
+    ImageKnob attackKnob;
+    ImageKnob ratioKnob;
+    ImageKnob releaseKnob;
    
     juce::Slider thresholdSlider;
     juce::Slider ratioSlider;
@@ -110,6 +112,10 @@ private:
     juce::Label attackLabel;
     juce::Label releaseLabel;
     juce::Label gainLabel;
+
+    juce::Label inputLabel;
+    juce::Label gainReductionLabel;
+    juce::Label outputLabel;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(OneCompAudioProcessorEditor)
 };

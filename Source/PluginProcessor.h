@@ -62,12 +62,17 @@ public:
 
     juce::AudioProcessorValueTreeState parameters;
 
+   
     float getGainReduction() const;
+    float getInputLevel() const; // Getter for input level
+    float getOutputLevel() const; // Getter for output level
 
 private:
     juce::dsp::Compressor<float> compressor;
 
     std::atomic<float> lastGainReduction{ 0.0f };
+    std::atomic<float> lastInputLevel{ 0.0f }; // Stores the last input level
+    std::atomic<float> lastOutputLevel{ 0.0f }; // Stores the last output level
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(OneCompAudioProcessor)
 };
