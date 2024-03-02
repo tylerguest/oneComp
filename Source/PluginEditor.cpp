@@ -112,24 +112,28 @@ OneCompAudioProcessorEditor::OneCompAudioProcessorEditor(OneCompAudioProcessor& 
     gainAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.parameters, "gain", gainKnob);
 
     // Position the input, GR, and output labels
-    inputLabel.setText("0.0", juce::dontSendNotification);
-    inputLabel.setFont(juce::Font(75.0f, juce::Font::bold));
+    inputLabel.setText("00.0", juce::dontSendNotification);
+    inputLabel.setFont(juce::Font(65.0f, juce::Font::bold));
     inputLabel.setColour(juce::Label::textColourId, juce::Colours::black);
-    inputLabel.setBounds(83, 825, 150, 80); // These bounds are arbitrary; set them according to your GUI design
+    inputLabel.setBounds(75, 825, 250, 80); // These bounds are arbitrary; set them according to your GUI design
     addAndMakeVisible(inputLabel);
 
     
-    gainReductionLabel.setText("0.0", juce::dontSendNotification);
-    gainReductionLabel.setFont(juce::Font(75.0f, juce::Font::bold));
+    gainReductionLabel.setText("00.0", juce::dontSendNotification);
+    gainReductionLabel.setFont(juce::Font(65.0f, juce::Font::bold));
     gainReductionLabel.setColour(juce::Label::textColourId, juce::Colours::red);
-    gainReductionLabel.setBounds(322, 825, 150, 80);
+    gainReductionLabel.setBounds(315, 825, 250, 80);
     addAndMakeVisible(gainReductionLabel);
 
-    outputLabel.setText("0.0", juce::dontSendNotification);
-    outputLabel.setFont(juce::Font(75.0f, juce::Font::bold));
+    outputLabel.setText("00.0", juce::dontSendNotification);
+    outputLabel.setFont(juce::Font(65.0f, juce::Font::bold));
     outputLabel.setColour(juce::Label::textColourId, juce::Colours::black);
-    outputLabel.setBounds(560, 825, 150, 80);
+    outputLabel.setBounds(550, 825, 250, 80); // (int x, int y, int w, int h)
     addAndMakeVisible(outputLabel);
+
+    // Initialize the menu bar and add it to the component
+    menuBar = std::make_unique<juce::MenuBarComponent>(this);
+    addAndMakeVisible(menuBar.get());
 
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
@@ -141,6 +145,7 @@ OneCompAudioProcessorEditor::OneCompAudioProcessorEditor(OneCompAudioProcessor& 
 
 OneCompAudioProcessorEditor::~OneCompAudioProcessorEditor()
 {
+    
     stopTimer();
 }
 
@@ -231,6 +236,12 @@ void OneCompAudioProcessorEditor::resized()
     int releaseKnobX = knobX + 450; // Example: Place it 200 pixels to the right of the threshold knob
     int releaseKnobY = knobY + 350; // Keep it on the same vertical level
     releaseKnob.setBounds(releaseKnobX, releaseKnobY, knobBounds.getWidth(), knobBounds.getHeight());
+
+    auto bounds = getLocalBounds();
+    auto menuBarHeight = juce::LookAndFeel::getDefaultLookAndFeel().getDefaultMenuBarHeight();
+
+    // Assign space for the menu bar at the top
+    menuBar->setBounds(bounds.removeFromTop(menuBarHeight));
 }
 
 void OneCompAudioProcessorEditor::timerCallback()
@@ -251,13 +262,26 @@ void OneCompAudioProcessorEditor::timerCallback()
     gainLabel.setText("Gain: " + juce::String(gainValue, 2), juce::dontSendNotification);
 
     auto formatDbValueForDisplay = [](float dbValue) -> juce::String {
-        if (dbValue <= -100.0f || dbValue == 0.0f) { // or use a small value close to silence if -100 is too strict
-            return "-0.0";
+        // Adjust values to represent analog 0 dB as -18 dBFS
+        dbValue -= 18.0f;
+
+        if (dbValue <= -100.0f || dbValue == 00.0f) { // Adjust the threshold as per your requirement
+            return "-00.0"; // Using a Unicode character for the minus sign
         }
         else {
-            return juce::String(dbValue, 1);
+            juce::String formattedString = juce::String(dbValue, 1);
+            // Ensure leading zero for single-digit negative values
+            if (dbValue > -10.0f && dbValue < 0.0f) {
+                formattedString = "-0" + juce::String(std::abs(dbValue), 1);
+            }
+            // Ensure three characters for positive single-digit values, including leading zeros
+            else if (dbValue >= 0.0f && dbValue < 10.0f) {
+                formattedString = "0" + juce::String(dbValue, 1);
+            }
+            return formattedString;
         }
-        };
+    };
+
 
 
     // Input level
@@ -266,7 +290,7 @@ void OneCompAudioProcessorEditor::timerCallback()
 
     // Gain reduction
     auto grDb = audioProcessor.getGainReduction();
-    gainReductionLabel.setText(formatDbValueForDisplay(grDb), juce::dontSendNotification);
+    gainReductionLabel.setText(formatDbValueForDisplay(grDb + 18.0f), juce::dontSendNotification);
 
     // Output level
     auto outputDb = audioProcessor.getOutputLevel();
@@ -281,4 +305,43 @@ void OneCompAudioProcessorEditor::initializeKnob(ImageKnob& knob, const juce::St
     auto attachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
         processor.parameters, parameterId, knob);
     // Depending on your design, you might keep these attachments in a vector if they need to be accessed later
+}
+
+juce::StringArray OneCompAudioProcessorEditor::getMenuBarNames()
+{
+    return { "File", "Edit", "Help" };
+}
+
+juce::PopupMenu OneCompAudioProcessorEditor::getMenuForIndex(int topLevelMenuIndex, const juce::String& menuName)
+{
+    juce::PopupMenu menu;
+    if (menuName == "File")
+    {
+        menu.addItem(1, "Open");
+        menu.addItem(2, "Save");
+        menu.addSeparator();
+        menu.addItem(3, "Exit");
+    }
+    else if (menuName == "Edit")
+    {
+        menu.addItem(4, "Undo");
+        menu.addItem(5, "Redo");
+    }
+    else if (menuName == "Help")
+    {
+        menu.addItem(6, "About");
+    }
+    return menu;
+}
+
+void OneCompAudioProcessorEditor::menuItemSelected(int menuItemID, int topLevelMenuIndex)
+{
+    // Handle menu item selection
+    switch (menuItemID)
+    {
+    case 1: /* Open */ break;
+    case 2: /* Save */ break;
+    case 3: /* Exit */ break;
+        // Handle other cases
+    }
 }

@@ -63,7 +63,7 @@ private:
 
 /**
 */
-class OneCompAudioProcessorEditor : public juce::AudioProcessorEditor, public juce::Timer
+class OneCompAudioProcessorEditor : public juce::AudioProcessorEditor, public juce::Timer, public juce::MenuBarModel
 {
 
 
@@ -81,6 +81,11 @@ public:
 
     // Utility function to initialize knobs and their attachments
     void initializeKnob(ImageKnob& knob, const juce::String& parameterId);
+
+    // Override MenuBarModel methods
+    juce::StringArray getMenuBarNames() override;
+    juce::PopupMenu getMenuForIndex(int topLevelMenuIndex, const juce::String& menuName) override;
+    void menuItemSelected(int menuItemID, int topLevelMenuIndex) override;
 
 private:
     // This reference is provided as a quick way for your editor to
@@ -106,6 +111,9 @@ private:
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> attackAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> releaseAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> gainAttachment;
+
+    // Member variables
+    std::unique_ptr<juce::MenuBarComponent> menuBar;
 
     juce::Label thresholdLabel;
     juce::Label ratioLabel;
