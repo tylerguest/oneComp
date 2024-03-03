@@ -99,18 +99,21 @@ private:
     ImageKnob attackKnob;
     ImageKnob ratioKnob;
     ImageKnob releaseKnob;
+    ImageKnob inputKnob;
    
     juce::Slider thresholdSlider;
     juce::Slider ratioSlider;
     juce::Slider attackSlider;
     juce::Slider releaseSlider;
     juce::Slider gainSlider;
+    
 
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> thresholdAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> ratioAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> attackAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> releaseAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> gainAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> inputAttachment;
 
     // Member variables
     std::unique_ptr<juce::MenuBarComponent> menuBar;

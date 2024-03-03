@@ -62,6 +62,13 @@ OneCompAudioProcessor::OneCompAudioProcessor()
         0.0f // default value
     ));
 
+    parameters.createAndAddParameter(std::make_unique<juce::AudioParameterFloat>(
+        "input",
+        "Input",
+        NormalisableRange<float>(-30.0f, 30.0f), // min, max, interval, skewFactor
+        0.0f // default value
+    ));
+
     parameters.state = juce::ValueTree("savedParams");
 
     
@@ -189,6 +196,23 @@ void OneCompAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce:
     auto totalNumInputChannels = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
 
+    // Clear any unused output channels.
+    for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
+        buffer.clear(i, 0, buffer.getNumSamples());
+
+    float inputGain = *parameters.getRawParameterValue("input");
+    
+    // Apply the input gain to each channel.
+    for (int channel = 0; channel < totalNumInputChannels; ++channel)
+    {
+        auto* channelData = buffer.getWritePointer(channel);
+        for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
+        {
+            // Apply input gain directly to the sample
+            channelData[sample] *= juce::Decibels::decibelsToGain(inputGain);
+        }
+    }
+
     // Assuming mono processing for simplicity. You might need to adjust for stereo or multi-channel.
     auto inputLevel = buffer.getRMSLevel(0, 0, buffer.getNumSamples()); // Measure input RMS level
     float inputLevelDb = inputLevel > 0.0f ? juce::Decibels::gainToDecibels(inputLevel) : -100.0f;
@@ -208,7 +232,6 @@ void OneCompAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce:
     float ratio = *parameters.getRawParameterValue("ratio");
     float attackTime = *parameters.getRawParameterValue("attack");
     float releaseTime = *parameters.getRawParameterValue("release");
-    float makeupGain = *parameters.getRawParameterValue("gain");
 
     // Update the compressor settings from parameters
     compressor.setThreshold(*parameters.getRawParameterValue("threshold"));
@@ -227,11 +250,7 @@ void OneCompAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce:
     auto outputLevel = buffer.getRMSLevel(0, 0, buffer.getNumSamples());
     float outputLevelDb = outputLevel > 0.0f ? juce::Decibels::gainToDecibels(outputLevel) : -100.0f;
 
-    // Calculate gain reduction in dB. If outputLevel is 0, avoid division by zero.
-    float gainReductionDb = outputLevel > 0 ? juce::Decibels::gainToDecibels(inputLevel / outputLevel) : 0.f;
-    // Since we're interested in reduction, we take the negative of the calculated value.
-    // This assumes inputLevel >= outputLevel. Adjust the logic if your scenario could differ.
-    lastGainReduction.store(-gainReductionDb, std::memory_order_release);
+    float makeupGain = *parameters.getRawParameterValue("gain");
 
     // This is the place where you'd normally do the guts of your plugin's
     // audio processing...
@@ -239,32 +258,19 @@ void OneCompAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce:
     // the samples and the outer loop is handling the channels.
     // Alternatively, you can process the samples with the channels
     // interleaved by keeping the same state.
-    for (int channel = 0; channel < totalNumInputChannels; ++channel)
-    {
+    for (int channel = 0; channel < totalNumInputChannels; ++channel) {
         auto* channelData = buffer.getWritePointer(channel);
-
-        for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
-        {
-            // Placeholder for actual compression logic
-            // For demonstration, let's just apply makeup gain
-            float inputSample = channelData[sample];
-            float inputGain = juce::Decibels::decibelsToGain(makeupGain);
-            channelData[sample] = inputSample * inputGain;
-
-            // TODO: Implement actual compression logic here
-            // This would involve checking the level of each sample against the threshold,
-            // applying gain reduction based on the ratio, and smoothing the gain changes
-            // with the attack and release parameters.
+        for (int sample = 0; sample < buffer.getNumSamples(); ++sample) {
+            // Apply output gain directly to the sample
+            channelData[sample] *= juce::Decibels::decibelsToGain(makeupGain);
         }
-
-        // ..do something to the data...
-        auto outputLevel = buffer.getRMSLevel(0, 0, buffer.getNumSamples());
-        float outputLevelDb = outputLevel > 0.0f ? juce::Decibels::gainToDecibels(outputLevel) : -100.0f;
-
-        lastOutputLevel.store(outputLevelDb, std::memory_order_relaxed);
-
-     
     }
+
+    // Calculate gain reduction in dB. If outputLevel is 0, avoid division by zero.
+    float gainReductionDb = outputLevel > 0 ? juce::Decibels::gainToDecibels(inputLevel / outputLevel) : 0.f;
+    // Since we're interested in reduction, we take the negative of the calculated value.
+    // This assumes inputLevel >= outputLevel. Adjust the logic if your scenario could differ.
+    lastGainReduction.store(-gainReductionDb, std::memory_order_release);
 }
 
 //==============================================================================
