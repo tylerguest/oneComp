@@ -232,6 +232,7 @@ void OneCompAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce:
     float ratio = *parameters.getRawParameterValue("ratio");
     float attackTime = *parameters.getRawParameterValue("attack");
     float releaseTime = *parameters.getRawParameterValue("release");
+    float makeupGain = *parameters.getRawParameterValue("gain");
 
     // Update the compressor settings from parameters
     compressor.setThreshold(*parameters.getRawParameterValue("threshold"));
@@ -248,9 +249,16 @@ void OneCompAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce:
 
     // Measure output RMS level after compression
     auto outputLevel = buffer.getRMSLevel(0, 0, buffer.getNumSamples());
-    float outputLevelDb = outputLevel > 0.0f ? juce::Decibels::gainToDecibels(outputLevel) : -100.0f;
 
-    float makeupGain = *parameters.getRawParameterValue("gain");
+    // Calculate gain reduction in dB. If outputLevel is 0, avoid division by zero.
+    float gainReductionDb = outputLevel > 0 ? juce::Decibels::gainToDecibels(inputLevel / outputLevel) : 0.f;
+
+    // Since we're interested in reduction, we take the negative of the calculated value.
+    // This assumes inputLevel >= outputLevel. Adjust the logic if your scenario could differ.
+    lastGainReduction.store(-gainReductionDb, std::memory_order_release);
+
+
+
 
     // This is the place where you'd normally do the guts of your plugin's
     // audio processing...
@@ -266,11 +274,10 @@ void OneCompAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce:
         }
     }
 
-    // Calculate gain reduction in dB. If outputLevel is 0, avoid division by zero.
-    float gainReductionDb = outputLevel > 0 ? juce::Decibels::gainToDecibels(inputLevel / outputLevel) : 0.f;
-    // Since we're interested in reduction, we take the negative of the calculated value.
-    // This assumes inputLevel >= outputLevel. Adjust the logic if your scenario could differ.
-    lastGainReduction.store(-gainReductionDb, std::memory_order_release);
+    auto outputLevel2 = buffer.getRMSLevel(0, 0, buffer.getNumSamples());
+    float outputLevelDb = outputLevel2 > 0.0f ? juce::Decibels::gainToDecibels(outputLevel2) : -100.0f;
+    lastOutputLevel.store(outputLevelDb, std::memory_order_release);
+
 }
 
 //==============================================================================

@@ -142,7 +142,7 @@ OneCompAudioProcessorEditor::OneCompAudioProcessorEditor(OneCompAudioProcessor& 
 
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
-    gainReductionMeter.repaint();
+    // gainReductionMeter.repaint();
     setSize(background.getWidth(), background.getHeight());
 
     startTimer(100);
@@ -256,55 +256,55 @@ void OneCompAudioProcessorEditor::resized()
 
 void OneCompAudioProcessorEditor::timerCallback()
 {
-    auto thresholdValue = audioProcessor.parameters.getRawParameterValue("threshold")->load();
-    thresholdLabel.setText("Threshold: " + juce::String(thresholdValue, 2), juce::dontSendNotification);
+   // auto thresholdValue = audioProcessor.parameters.getRawParameterValue("threshold")->load();
+   // thresholdLabel.setText("Threshold: " + juce::String(thresholdValue, 2), juce::dontSendNotification);
+   //
+   // auto ratioValue = audioProcessor.parameters.getRawParameterValue("ratio")->load();
+   // ratioLabel.setText("Ratio: " + juce::String(ratioValue, 2), juce::dontSendNotification);
+   //
+   // auto attackValue = audioProcessor.parameters.getRawParameterValue("attack")->load();
+   // attackLabel.setText("Attack: " + juce::String(attackValue, 2), juce::dontSendNotification);
+   //
+   // auto releaseValue = audioProcessor.parameters.getRawParameterValue("release")->load();
+   // releaseLabel.setText("Release: " + juce::String(releaseValue, 2), juce::dontSendNotification);
+   //
+   // auto gainValue = audioProcessor.parameters.getRawParameterValue("gain")->load();
+   // gainLabel.setText("Gain: " + juce::String(gainValue, 2), juce::dontSendNotification);
 
-    auto ratioValue = audioProcessor.parameters.getRawParameterValue("ratio")->load();
-    ratioLabel.setText("Ratio: " + juce::String(ratioValue, 2), juce::dontSendNotification);
-
-    auto attackValue = audioProcessor.parameters.getRawParameterValue("attack")->load();
-    attackLabel.setText("Attack: " + juce::String(attackValue, 2), juce::dontSendNotification);
-
-    auto releaseValue = audioProcessor.parameters.getRawParameterValue("release")->load();
-    releaseLabel.setText("Release: " + juce::String(releaseValue, 2), juce::dontSendNotification);
-
-    auto gainValue = audioProcessor.parameters.getRawParameterValue("gain")->load();
-    gainLabel.setText("Gain: " + juce::String(gainValue, 2), juce::dontSendNotification);
-
-    auto formatDbValueForDisplay = [](float dbValue) -> juce::String {
-        // Adjust values to represent analog 0 dB as -18 dBFS
-        dbValue -= 18.0f;
-
-        if (dbValue <= -100.0f || dbValue == 00.0f) { // Adjust the threshold as per your requirement
-            return "-00.0"; // Using a Unicode character for the minus sign
-        }
-        else {
-            juce::String formattedString = juce::String(dbValue, 1);
-            // Ensure leading zero for single-digit negative values
-            if (dbValue > -10.0f && dbValue < 0.0f) {
-                formattedString = "-0" + juce::String(std::abs(dbValue), 1);
-            }
-            // Ensure three characters for positive single-digit values, including leading zeros
-            else if (dbValue >= 0.0f && dbValue < 10.0f) {
-                formattedString = "0" + juce::String(dbValue, 1);
-            }
-            return formattedString;
-        }
-    };
+   // auto formatDbValueForDisplay = [](float dbValue) -> juce::String {
+   //     // Adjust values to represent analog 0 dB as -18 dBFS
+   //     dbValue -= 18.0f;
+   //
+   //     if (dbValue <= -100.0f || dbValue == 00.0f) { // Adjust the threshold as per your requirement
+   //         return "-00.0"; // Using a Unicode character for the minus sign
+   //     }
+   //     else {
+   //         juce::String formattedString = juce::String(dbValue, 1);
+   //         // Ensure leading zero for single-digit negative values
+   //         if (dbValue > -10.0f && dbValue < 0.0f) {
+   //             formattedString = "-0" + juce::String(std::abs(dbValue), 1);
+   //         }
+   //         // Ensure three characters for positive single-digit values, including leading zeros
+   //         else if (dbValue >= 0.0f && dbValue < 10.0f) {
+   //             formattedString = "0" + juce::String(dbValue, 1);
+   //         }
+   //         return formattedString;
+   //     }
+   // };
 
 
 
     // Input level
     auto inputDb = audioProcessor.getInputLevel();
-    inputLabel.setText(formatDbValueForDisplay(inputDb), juce::dontSendNotification);
+    inputLabel.setText(juce::String(inputDb, 1), juce::dontSendNotification);
 
     // Gain reduction
     auto grDb = audioProcessor.getGainReduction();
-    gainReductionLabel.setText(formatDbValueForDisplay(grDb + 18.0f), juce::dontSendNotification);
+    gainReductionLabel.setText(juce::String(grDb, 1), juce::dontSendNotification);
 
     // Output level
     auto outputDb = audioProcessor.getOutputLevel();
-    outputLabel.setText(formatDbValueForDisplay(outputDb), juce::dontSendNotification);
+    outputLabel.setText(juce::String(outputDb, 1), juce::dontSendNotification);
 
 }
 
