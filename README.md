@@ -3,5 +3,5 @@ Constantly a work in progress, will update the readme as needed.
 
 GUI as of 3/5/2024.
 
-<img width="602" alt="image" src="https://github.com/tylerguest/oneComp/assets/83128087/48aa6ec7-1a9a-4617-b9e6-e01b1355672c">
+<img width="600" alt="image" src="https://github.com/tylerguest/oneComp/assets/83128087/620b3891-c16d-4bd7-929d-0701d96df12e">
 
