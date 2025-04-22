@@ -1,20 +1,9 @@
-/*
-  ==============================================================================
-
-    This file contains the basic framework code for a JUCE plugin editor.
-
-  ==============================================================================
-*/
 
 #pragma once
 
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
 #include "GRMeter.h"
-
-//==============================================================================
-
-
 
 class ImageKnob : public juce::Slider {
 public:
@@ -32,20 +21,12 @@ public:
     void ImageKnob::paint(juce::Graphics& g) {
         auto bounds = getLocalBounds().toFloat();
         auto rotationCentre = bounds.getCentre();
-
-        // Calculate the angle for the current value
         auto angle = getRotaryAngle();
 
-        // The image needs to be centered in the bounds and rotated around its center.
-        // An AffineTransform is used for this purpose, which first translates the image
-        // so that its center is at the origin (0, 0), then rotates it, and finally
-        // translates it to the center of the bounds.
+        juce::AffineTransform transform = juce::AffineTransform::translation(-image.getWidth() / 2.0f, -image.getHeight() / 2.0f) 
+            .rotated(angle) 
+            .translated(rotationCentre.getX(), rotationCentre.getY()); 
 
-        juce::AffineTransform transform = juce::AffineTransform::translation(-image.getWidth() / 2.0f, -image.getHeight() / 2.0f) // Translate image to origin
-            .rotated(angle) // Rotate around the origin
-            .translated(rotationCentre.getX(), rotationCentre.getY()); // Translate back to the center of the bounds
-
-        // Now draw the image with the transform
         g.drawImageTransformed(image, transform, false);
     }
 
@@ -59,10 +40,6 @@ private:
     }
 };
 
-//==============================================================================
-
-/**
-*/
 class OneCompAudioProcessorEditor : public juce::AudioProcessorEditor, public juce::Timer, public juce::MenuBarModel
 {
 
@@ -71,27 +48,20 @@ public:
     OneCompAudioProcessorEditor(OneCompAudioProcessor&);
     ~OneCompAudioProcessorEditor() override;
 
-
-    //==============================================================================
     void paint(juce::Graphics&) override;
     void resized() override;
 
-    // Timer callback
     void timerCallback() override;
 
-    // Utility function to initialize knobs and their attachments
     void initializeKnob(ImageKnob& knob, const juce::String& parameterId);
 
-    // Override MenuBarModel methods
     juce::StringArray getMenuBarNames() override;
     juce::PopupMenu getMenuForIndex(int topLevelMenuIndex, const juce::String& menuName) override;
     void menuItemSelected(int menuItemID, int topLevelMenuIndex) override;
 
 private:
-    // This reference is provided as a quick way for your editor to
-    // access the processor object that created it.
     OneCompAudioProcessor& audioProcessor;
-    GainReductionMeter gainReductionMeter; // Add this line
+    GainReductionMeter gainReductionMeter; 
 
     juce::Image background;
     ImageKnob thresholdKnob;
@@ -115,7 +85,6 @@ private:
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> gainAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> inputAttachment;
 
-    // Member variables
     std::unique_ptr<juce::MenuBarComponent> menuBar;
 
     juce::Label thresholdLabel;
